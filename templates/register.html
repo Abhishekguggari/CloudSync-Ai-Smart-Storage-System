@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Register | CloudSync AI</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="background-blur"></div>
+
+<div class="auth-container">
+
+<div class="logo">
+☁ CloudSync AI
+</div>
+
+<h1>Create Account</h1>
+
+<p class="subtitle">
+Secure your files with intelligent cloud storage
+</p>
+
+<form>
+
+<input type="text"
+placeholder="Username"
+required>
+
+<input type="email"
+placeholder="Email Address"
+required>
+
+<input type="password"
+id="password"
+placeholder="Password"
+required
+onkeyup="checkPassword()">
+
+<input type="password"
+id="confirmPassword"
+placeholder="Confirm Password"
+required
+onkeyup="checkPassword()">
+
+<p id="message"></p>
+
+<div class="checkbox-row">
+
+<input type="checkbox"
+onclick="showPassword()">
+
+<span>Show Password</span>
+
+</div>
+
+<button type="submit">
+Create Account
+</button>
+
+<p class="bottom-text">
+Already have an account?
+<a href="login.html">Login</a>
+</p>
+
+</form>
+
+</div>
+
+<script>
+
+function checkPassword(){
+
+let pass1 =
+document.getElementById("password").value;
+
+let pass2 =
+document.getElementById("confirmPassword").value;
+
+let message =
+document.getElementById("message");
+
+if(pass2 === ""){
+
+message.innerHTML = "";
+
+}
+
+else if(pass1 === pass2){
+
+message.style.color = "#00ffae";
+
+message.innerHTML = "Passwords match";
+
+}
+
+else{
+
+message.style.color = "#ff4d6d";
+
+message.innerHTML = "Passwords do not match";
+
+}
+
+}
+
+function showPassword(){
+
+let pass1 =
+document.getElementById("password");
+
+let pass2 =
+document.getElementById("confirmPassword");
+
+if(pass1.type === "password"){
+
+pass1.type = "text";
+pass2.type = "text";
+
+}
+
+else{
+
+pass1.type = "password";
+pass2.type = "password";
+
+}
+
+}
+
+</script>
+
+</body>
+</html>

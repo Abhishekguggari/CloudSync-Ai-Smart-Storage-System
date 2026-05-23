@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard | CloudSync AI</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="dashboard">
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+<div>
+
+<h1>☁ CloudSync AI</h1>
+
+<a href="#">📂 Dashboard</a>
+
+<a href="upload.html">
+⬆ Upload Files
+</a>
+
+<a href="#">
+🤖 AI Search
+</a>
+
+<a href="#">
+📊 Analytics
+</a>
+
+<a href="#">
+⚙ Settings
+</a>
+
+</div>
+
+<a href="#" class="logout-btn">
+🚪 Logout
+</a>
+
+</div>
+
+<!-- MAIN CONTENT -->
+
+<div class="main-content">
+
+<div class="topbar">
+
+<div>
+<h2>Dashboard</h2>
+
+<p class="top-text">
+Manage and secure your cloud files
+</p>
+</div>
+
+<div class="profile-box">
+Abhishek
+</div>
+
+</div>
+
+<!-- CARDS -->
+
+<div class="cards">
+
+<div class="card">
+
+<h3>Total Files</h3>
+
+<p>124</p>
+
+</div>
+
+<div class="card">
+
+<h3>Cloud Synced</h3>
+
+<p>98</p>
+
+</div>
+
+<div class="card">
+
+<h3>Storage Used</h3>
+
+<p>14.2 GB</p>
+
+</div>
+
+<div class="card">
+
+<h3>AI Categorized</h3>
+
+<p>87%</p>
+
+</div>
+
+</div>
+
+<!-- FILE TABLE -->
+
+<div class="table-section">
+
+<div class="table-header">
+
+<h2>Your Files</h2>
+
+<input type="text"
+placeholder="Search files...">
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>File</th>
+<th>Size</th>
+<th>Date</th>
+<th>Status</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>project_report.pdf</td>
+
+<td>2.1 MB</td>
+
+<td>12 Mar 2026</td>
+
+<td>
+<span class="status synced">
+Synced
+</span>
+</td>
+
+<td>
+
+<button class="download-btn">
+Download
+</button>
+
+<button class="delete-btn">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>cloud_notes.docx</td>
+
+<td>1.2 MB</td>
+
+<td>13 Mar 2026</td>
+
+<td>
+<span class="status pending">
+Pending
+</span>
+</td>
+
+<td>
+
+<button class="download-btn">
+Download
+</button>
+
+<button class="delete-btn">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
