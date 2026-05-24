@@ -9,7 +9,7 @@ s3 = boto3.client(
     region_name=AWS_REGION
 )
 
-
+#sync to cloudgit
 def sync_to_cloud(filepath):
     try:
         filename = filepath.split('/')[-1]

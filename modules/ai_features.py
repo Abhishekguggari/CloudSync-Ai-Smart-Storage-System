@@ -1,6 +1,6 @@
 import os
 
-
+# AI-BASED FILE CATEGORIZATION AND DUPLICATE DETECTION
 def categorize_file(filename):
     extension = filename.split('.')[-1]
 

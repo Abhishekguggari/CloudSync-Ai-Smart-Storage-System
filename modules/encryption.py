@@ -3,7 +3,7 @@ from cryptography.fernet import Fernet
 key = Fernet.generate_key()
 fernet = Fernet(key)
 
-
+#encryption
 def encrypt_file(filepath):
     with open(filepath, 'rb') as file:
         original = file.read()
