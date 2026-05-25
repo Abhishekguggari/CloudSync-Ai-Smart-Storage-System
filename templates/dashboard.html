@@ -4,6 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0">
 
@@ -26,28 +27,33 @@ href="{{ url_for('static', filename='style.css') }}">
 
 <h1>☁ CloudSync AI</h1>
 
-<a href="#">📂 Dashboard</a>
+<a href="/dashboard" class="active-link">
+📂 Dashboard
+</a>
 
-<a href="upload.html">
+<a href="/upload">
 ⬆ Upload Files
 </a>
 
-<a href="#">
+<a href="/search">
 🤖 AI Search
 </a>
 
-<a href="#">
+<a href="/analytics">
 📊 Analytics
 </a>
 
-<a href="#">
+<a href="/settings">
 ⚙ Settings
 </a>
 
 </div>
 
-<a href="#" class="logout-btn">
+<a href="/logout"
+class="logout-btn">
+
 🚪 Logout
+
 </a>
 
 </div>
@@ -56,23 +62,56 @@ href="{{ url_for('static', filename='style.css') }}">
 
 <div class="main-content">
 
+<!-- TOPBAR -->
+
 <div class="topbar">
 
 <div>
-<h2>Dashboard</h2>
+
+<h2>
+{% if admin_mode %}
+🛡️ Admin System Control Panel
+{% else %}
+Welcome,
+{{ session.get('user', 'User') }}
+👋
+{% endif %}
+</h2>
 
 <p class="top-text">
-Manage and secure your cloud files
+{% if admin_mode %}
+Complete system-wide overview of all users, files and security activity
+{% else %}
+Manage, secure and synchronize your cloud files intelligently
+{% endif %}
 </p>
+
 </div>
 
 <div class="profile-box">
-Abhishek
-</div>
+
+☁ Premium User
 
 </div>
 
-<!-- CARDS -->
+</div>
+
+{% if admin_mode %}
+<!-- ADMIN USERS OVERVIEW -->
+<div class="storage-card" style="margin-bottom: 30px; background: rgba(255,255,255,0.08); padding: 25px; border-radius: 20px;">
+    <h3 style="color: #60a5fa; margin-bottom: 15px;">👥 Registered Users</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        {% for u in users %}
+        <div style="background: rgba(255,255,255,0.05); padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+            <strong style="color: #e2e8f0;">{{ u[1] }}</strong> <br>
+            <span style="color: #94a3b8; font-size: 12px;">{{ u[2] }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ANALYTICS CARDS -->
 
 <div class="cards">
 
@@ -80,33 +119,100 @@ Abhishek
 
 <h3>Total Files</h3>
 
-<p>124</p>
+<p>{{ files|length }}</p>
+
+<span class="card-status">
+Active Storage
+</span>
 
 </div>
 
 <div class="card">
 
-<h3>Cloud Synced</h3>
+<h3>Cloud Sync</h3>
 
-<p>98</p>
+<p>Enabled</p>
 
-</div>
-
-<div class="card">
-
-<h3>Storage Used</h3>
-
-<p>14.2 GB</p>
+<span class="card-status synced-text">
+Synced
+</span>
 
 </div>
 
 <div class="card">
 
-<h3>AI Categorized</h3>
+<h3>AI Detection</h3>
 
-<p>87%</p>
+<p>Smart Scan</p>
+
+<span class="card-status">
+Running
+</span>
 
 </div>
+
+<div class="card">
+
+<h3>Security</h3>
+
+<p>Encrypted</p>
+
+<span class="card-status secure-text">
+Protected
+</span>
+
+</div>
+
+</div>
+
+<!-- STORAGE BAR -->
+
+<div class="storage-card">
+
+<div class="storage-top">
+
+<h3>Storage Usage</h3>
+
+<p>68% Used</p>
+
+</div>
+
+<div class="progress-bar">
+
+<div class="progress-fill"></div>
+
+</div>
+
+<p class="storage-text">
+14.2 GB used of 20 GB cloud storage
+</p>
+
+</div>
+
+<!-- QUICK ACTIONS -->
+
+<div class="quick-actions">
+
+<a href="/upload"
+class="quick-btn">
+
+⬆ Upload New File
+
+</a>
+
+<a href="/search"
+class="quick-btn">
+
+🤖 Smart Search
+
+</a>
+
+<a href="/analytics"
+class="quick-btn">
+
+📊 View Analytics
+
+</a>
 
 </div>
 
@@ -118,7 +224,8 @@ Abhishek
 
 <h2>Your Files</h2>
 
-<input type="text"
+<input
+type="text"
 placeholder="Search files...">
 
 </div>
@@ -129,11 +236,15 @@ placeholder="Search files...">
 
 <tr>
 
-<th>File</th>
-<th>Size</th>
-<th>Date</th>
-<th>Status</th>
-<th>Action</th>
+<th>File Name</th>
+
+<th>Category</th>
+
+<th>Duplicate Status</th>
+
+<th>Cloud Sync</th>
+
+<th>Actions</th>
 
 </tr>
 
@@ -141,61 +252,127 @@ placeholder="Search files...">
 
 <tbody>
 
+{% if files %}
+
+{% for file in files %}
+
 <tr>
 
-<td>project_report.pdf</td>
-
-<td>2.1 MB</td>
-
-<td>12 Mar 2026</td>
+<!-- FILE NAME -->
 
 <td>
+
+📄 {{ file[2] }}
+{% if admin_mode %}
+<br><span style="font-size: 11px; background: #3b82f6; color: white; padding: 2px 8px; border-radius: 10px; margin-top: 5px; display: inline-block;">User: {{ file[1] }}</span>
+{% endif %}
+
+</td>
+
+<!-- CATEGORY -->
+
+<td>
+
+{% if file[3] == "Image" %}
+
+🖼 Image
+
+{% elif file[3] == "Document" %}
+
+📄 Document
+
+{% elif file[3] == "Video" %}
+
+🎥 Video
+
+{% else %}
+
+📁 Other
+
+{% endif %}
+
+</td>
+
+<!-- DUPLICATE -->
+
+<td>
+
+{% if "Duplicate" in file[4] %}
+
+<span class="duplicate-badge">
+
+⚠ Duplicate
+
+</span>
+
+{% else %}
+
+<span class="safe-badge">
+
+✅ Unique
+
+</span>
+
+{% endif %}
+
+</td>
+
+<!-- CLOUD STATUS -->
+
+<td>
+
 <span class="status synced">
-Synced
+
+{{ file[5] }}
+
 </span>
+
 </td>
+
+<!-- ACTIONS -->
 
 <td>
 
+<a href="/download/{{ file[2] }}">
+
 <button class="download-btn">
+
 Download
+
 </button>
 
+</a>
+
+<a href="/delete/{{ file[2] }}">
+
 <button class="delete-btn">
+
 Delete
+
 </button>
+
+</a>
 
 </td>
 
 </tr>
+
+{% endfor %}
+
+{% else %}
 
 <tr>
 
-<td>cloud_notes.docx</td>
+<td colspan="5"
+class="empty-state">
 
-<td>1.2 MB</td>
-
-<td>13 Mar 2026</td>
-
-<td>
-<span class="status pending">
-Pending
-</span>
-</td>
-
-<td>
-
-<button class="download-btn">
-Download
-</button>
-
-<button class="delete-btn">
-Delete
-</button>
+No files uploaded yet ☁
 
 </td>
 
 </tr>
+
+{% endif %}
 
 </tbody>
 

@@ -29,13 +29,17 @@ href="{{ url_for('static', filename='style.css') }}">
 Access your intelligent cloud storage platform
 </p>
 
-<form>
+<form method="POST" action="/">
 
-<input type="text"
+<input
+type="text"
+name="username"
 placeholder="Username"
 required>
 
-<input type="password"
+<input
+type="password"
+name="password"
 placeholder="Password"
 required>
 
@@ -45,7 +49,11 @@ Login
 
 <p class="bottom-text">
 Don't have an account?
-<a href="register.html">Register</a>
+
+<a href="/register">
+Register
+</a>
+
 </p>
 
 </form>

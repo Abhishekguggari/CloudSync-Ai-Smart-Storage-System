@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>AI Smart Search | CloudSync AI</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+<style>
+
+.search-page{
+
+padding:50px;
+
+min-height:100vh;
+
+}
+
+.search-header{
+
+margin-bottom:35px;
+
+}
+
+.search-header h1{
+
+font-size:42px;
+
+margin-bottom:10px;
+
+}
+
+.search-header p{
+
+color:#cbd5e1;
+
+font-size:16px;
+
+}
+
+.search-box{
+
+display:flex;
+
+gap:15px;
+
+margin-bottom:35px;
+
+}
+
+.search-box input{
+
+flex:1;
+
+padding:18px;
+
+border-radius:16px;
+
+font-size:16px;
+
+background:
+rgba(255,255,255,0.08);
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+color:white;
+
+outline:none;
+
+backdrop-filter:blur(10px);
+
+}
+
+.search-box input:focus{
+
+border:
+1px solid #60a5fa;
+
+box-shadow:
+0 0 15px rgba(96,165,250,0.4);
+
+}
+
+.search-box button{
+
+width:180px;
+
+margin-top:0;
+
+border-radius:16px;
+
+background:
+linear-gradient(
+135deg,
+#3b82f6,
+#2563eb
+);
+
+}
+
+.results-grid{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(320px,1fr));
+
+gap:25px;
+
+}
+
+.search-card{
+
+padding:28px;
+
+border-radius:24px;
+
+background:
+rgba(255,255,255,0.08);
+
+backdrop-filter:blur(18px);
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+transition:0.3s;
+
+box-shadow:
+0 8px 24px rgba(0,0,0,0.25);
+
+}
+
+.search-card:hover{
+
+transform:translateY(-5px);
+
+box-shadow:
+0 12px 30px rgba(0,0,0,0.35);
+
+}
+
+.search-card h2{
+
+font-size:22px;
+
+margin-bottom:18px;
+
+color:#60a5fa;
+
+word-break:break-word;
+
+}
+
+.info-row{
+
+margin-bottom:12px;
+
+color:#e2e8f0;
+
+}
+
+.badge{
+
+display:inline-block;
+
+padding:8px 14px;
+
+border-radius:20px;
+
+font-size:13px;
+
+font-weight:bold;
+
+margin-top:8px;
+
+}
+
+.image-badge{
+
+background:#1e3a8a;
+
+color:#bfdbfe;
+
+}
+
+.document-badge{
+
+background:#164e63;
+
+color:#a5f3fc;
+
+}
+
+.video-badge{
+
+background:#4c1d95;
+
+color:#ddd6fe;
+
+}
+
+.other-badge{
+
+background:#374151;
+
+color:#e5e7eb;
+
+}
+
+.duplicate-badge{
+
+background:#7f1d1d;
+
+color:#fecaca;
+
+}
+
+.unique-badge{
+
+background:#052e16;
+
+color:#86efac;
+
+}
+
+.relevance-badge{
+
+background:#1e3a8a;
+
+color:#bfdbfe;
+
+border: 1px solid #3b82f6;
+
+}
+
+.synced-badge{
+
+background:#064e3b;
+
+color:#6ee7b7;
+
+}
+
+.empty-search{
+
+padding:50px;
+
+text-align:center;
+
+border-radius:24px;
+
+background:
+rgba(255,255,255,0.05);
+
+color:#94a3b8;
+
+font-size:18px;
+
+}
+
+.action-btns{
+
+margin-top:20px;
+
+display:flex;
+
+gap:12px;
+
+}
+
+.download-btn,
+.delete-btn{
+
+width:auto;
+
+padding:10px 18px;
+
+border-radius:12px;
+
+margin-top:0;
+
+}
+
+.download-btn{
+
+background:#2563eb;
+
+}
+
+.delete-btn{
+
+background:#dc2626;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="search-page">
+
+<!-- HEADER -->
+
+<div class="search-header">
+
+<h1>🤖 AI Smart Search</h1>
+
+<p>
+Search and discover files intelligently using CloudSync AI
+</p>
+
+</div>
+
+<!-- SEARCH FORM -->
+
+<form method="POST">
+
+<div class="search-box">
+
+<input
+type="text"
+name="keyword"
+placeholder="Search files intelligently..."
+required>
+
+<button type="submit">
+
+Search Files
+
+</button>
+
+</div>
+
+</form>
+
+<!-- RESULTS -->
+
+{% if results %}
+
+<div class="results-grid">
+
+{% for file in results %}
+
+<div class="search-card">
+
+<!-- FILE NAME -->
+
+<div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+    <h2 style="margin: 0;">📄 {{ file[2] }}</h2>
+    <span class="badge relevance-badge">🤖 {{ file[6] }}% Match</span>
+</div>
+
+<!-- CATEGORY -->
+
+<div class="info-row">
+
+<strong>Category:</strong>
+
+{% if file[3] == "Image" %}
+
+<span class="badge image-badge">
+
+🖼 Image
+
+</span>
+
+{% elif file[3] == "Document" %}
+
+<span class="badge document-badge">
+
+📄 Document
+
+</span>
+
+{% elif file[3] == "Video" %}
+
+<span class="badge video-badge">
+
+🎥 Video
+
+</span>
+
+{% else %}
+
+<span class="badge other-badge">
+
+📁 Other
+
+</span>
+
+{% endif %}
+
+</div>
+
+<!-- DUPLICATE -->
+
+<div class="info-row">
+
+<strong>Duplicate Status:</strong>
+
+{% if "Duplicate" in file[4] %}
+
+<span class="badge duplicate-badge">
+
+⚠ Duplicate Found
+
+</span>
+
+{% else %}
+
+<span class="badge unique-badge">
+
+✅ Unique File
+
+</span>
+
+{% endif %}
+
+</div>
+
+<!-- CLOUD STATUS -->
+
+<div class="info-row">
+
+<strong>Cloud Sync:</strong>
+
+<span class="badge synced-badge">
+
+☁ {{ file[5] }}
+
+</span>
+
+</div>
+
+<!-- ACTIONS -->
+
+<div class="action-btns">
+
+<a href="/download/{{ file[2] }}">
+
+<button class="download-btn">
+
+Download
+
+</button>
+
+</a>
+
+<a href="/delete/{{ file[2] }}">
+
+<button class="delete-btn">
+
+Delete
+
+</button>
+
+</a>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="empty-search">
+
+☁ No search results found yet
+
+</div>
+
+{% endif %}
+
+</div>
+
+</body>
+</html>

@@ -1,33 +1,70 @@
 import os
+import hashlib
 
-# AI-BASED FILE CATEGORIZATION AND DUPLICATE DETECTION
+UPLOAD_FOLDER = "uploads"
+
+# AI CATEGORY DETECTION
+
 def categorize_file(filename):
-    extension = filename.split('.')[-1]
 
-    image_types = ['png', 'jpg', 'jpeg']
-    document_types = ['pdf', 'docx', 'txt']
-    video_types = ['mp4']
+    extension = filename.split('.')[-1].lower()
 
-    if extension in image_types:
-        return 'Image'
+    if extension in ['jpg', 'png', 'jpeg']:
 
-    elif extension in document_types:
-        return 'Document'
+        return "Image"
 
-    elif extension in video_types:
-        return 'Video'
+    elif extension in ['pdf', 'docx', 'txt']:
 
-    return 'Other'
+        return "Document"
 
+    elif extension in ['mp4', 'mkv']:
+
+        return "Video"
+
+    else:
+
+        return "Other"
+
+# DUPLICATE DETECTION
+
+def file_hash(filepath):
+
+    hasher = hashlib.md5()
+
+    with open(filepath, 'rb') as file:
+
+        buffer = file.read()
+
+        hasher.update(buffer)
+
+    return hasher.hexdigest()
 
 def detect_duplicate(filename):
-    upload_path = 'uploads'
 
-    files = os.listdir(upload_path)
+    current_path = os.path.join(
+        UPLOAD_FOLDER,
+        filename
+    )
 
-    count = files.count(filename)
+    if not os.path.exists(current_path):
 
-    if count > 1:
-        return 'Duplicate'
+        return "No"
 
-    return 'Unique'
+    current_hash = file_hash(current_path)
+
+    for existing_file in os.listdir(UPLOAD_FOLDER):
+
+        existing_path = os.path.join(
+            UPLOAD_FOLDER,
+            existing_file
+        )
+
+        if existing_file != filename:
+
+            existing_hash = file_hash(existing_path)
+
+            if current_hash == existing_hash:
+
+                return "Duplicate Found"
+
+    return "No Duplicate"

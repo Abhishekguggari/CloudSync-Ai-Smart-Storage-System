@@ -1,7 +1,7 @@
-import uuid
+def share_file(filename):
 
-#create link
-def generate_share_link(filename):
-    token = uuid.uuid4()
+    share_link = (
+        f"http://127.0.0.1:5000/download/{filename}"
+    )
 
-    return f"http://127.0.0.1:5000/share/{filename}/{token}"
+    return share_link
