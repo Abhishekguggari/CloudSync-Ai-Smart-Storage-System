@@ -1,70 +1,66 @@
 import os
 import hashlib
+import sqlite3
 
 UPLOAD_FOLDER = "uploads"
 
-# AI CATEGORY DETECTION
-
+# =========================
+# CATEGORY DETECTION
+# =========================
 def categorize_file(filename):
-
     extension = filename.split('.')[-1].lower()
-
-    if extension in ['jpg', 'png', 'jpeg']:
-
+    if extension in ['jpg', 'jpeg', 'png', 'gif']:
         return "Image"
-
     elif extension in ['pdf', 'docx', 'txt']:
-
         return "Document"
-
-    elif extension in ['mp4', 'mkv']:
-
+    elif extension in ['mp4', 'mkv', 'avi']:
         return "Video"
-
+    elif extension in ['mp3', 'wav']:
+        return "Audio"
     else:
-
         return "Other"
 
-# DUPLICATE DETECTION
-
-def file_hash(filepath):
-
+# =========================
+# FILE HASH
+# =========================
+def file_hash(file_input):
     hasher = hashlib.md5()
+    
+    # Process memory byte arrays
+    if isinstance(file_input, bytes):
+        hasher.update(file_input)
+        return hasher.hexdigest()
+        
+    # Process standard text paths
+    elif isinstance(file_input, str):
+        if not os.path.exists(file_input):
+            return ""
+        with open(file_input, 'rb') as file:
+            while True:
+                chunk = file.read(4096)
+                if not chunk:
+                    break
+                hasher.update(chunk)
+        return hasher.hexdigest()
+    return ""
 
-    with open(filepath, 'rb') as file:
+# =========================
+# DUPLICATE DETECTION
+# =========================
+def detect_duplicate(username, current_hash):
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
 
-        buffer = file.read()
-
-        hasher.update(buffer)
-
-    return hasher.hexdigest()
-
-def detect_duplicate(filename):
-
-    current_path = os.path.join(
-        UPLOAD_FOLDER,
-        filename
+    cursor.execute(
+        '''
+        SELECT id FROM files
+        WHERE username=? AND file_hash=?
+        ''',
+        (username, current_hash)
     )
+    existing = cursor.fetchone()
+    conn.close()
 
-    if not os.path.exists(current_path):
-
-        return "No"
-
-    current_hash = file_hash(current_path)
-
-    for existing_file in os.listdir(UPLOAD_FOLDER):
-
-        existing_path = os.path.join(
-            UPLOAD_FOLDER,
-            existing_file
-        )
-
-        if existing_file != filename:
-
-            existing_hash = file_hash(existing_path)
-
-            if current_hash == existing_hash:
-
-                return "Duplicate Found"
-
-    return "No Duplicate"
+    if existing:
+        return "Duplicate Found"
+    return "Unique"

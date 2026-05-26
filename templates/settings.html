@@ -1,261 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>Settings | CloudSync AI</title>
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
-
-<style>
-
-.settings-container{
-
-padding:40px;
-
-color:white;
-
-}
-
-.settings-card{
-
-background:rgba(255,255,255,0.08);
-
-backdrop-filter:blur(15px);
-
-padding:30px;
-
-border-radius:20px;
-
-width:500px;
-
-box-shadow:0 10px 30px rgba(0,0,0,0.3);
-
-}
-
-.setting-item{
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-padding:20px 0;
-
-border-bottom:1px solid rgba(255,255,255,0.1);
-
-}
-
-.switch{
-
-position:relative;
-
-display:inline-block;
-
-width:60px;
-
-height:30px;
-
-}
-
-.switch input{
-
-opacity:0;
-
-width:0;
-
-height:0;
-
-}
-
-.slider{
-
-position:absolute;
-
-cursor:pointer;
-
-top:0;
-
-left:0;
-
-right:0;
-
-bottom:0;
-
-background:#555;
-
-transition:0.4s;
-
-border-radius:34px;
-
-}
-
-.slider:before{
-
-position:absolute;
-
-content:"";
-
-height:22px;
-
-width:22px;
-
-left:4px;
-
-bottom:4px;
-
-background:white;
-
-transition:0.4s;
-
-border-radius:50%;
-
-}
-
-input:checked + .slider{
-
-background:#00c6ff;
-
-}
-
-input:checked + .slider:before{
-
-transform:translateX(28px);
-
-}
-
-.save-btn{
-
-margin-top:30px;
-
-padding:14px;
-
-width:100%;
-
-border:none;
-
-border-radius:12px;
-
-background:linear-gradient(
-90deg,
-#00c6ff,
-#0072ff
-);
-
-color:white;
-
-font-size:16px;
-
-cursor:pointer;
-
-font-weight:bold;
-
-}
-
-.save-btn:hover{
-
-opacity:0.9;
-
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | CloudSync AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function toggleDarkMode(){
+            document.body.classList.toggle("light-mode");
+            localStorage.setItem("theme", document.body.classList.contains("light-mode") ? "light" : "dark");
+        }
+
+        window.onload = function(){
+            let theme = localStorage.getItem("theme");
+            let dmCheckbox = document.getElementById("dark-mode-checkbox");
+            if(theme === "light"){
+                document.body.classList.add("light-mode");
+                if (dmCheckbox) dmCheckbox.checked = false; // Sync switch visual state
+            } else {
+                if (dmCheckbox) dmCheckbox.checked = true;
+            }
+        }
+    </script>
 </head>
-
 <body>
+    <div class="dashboard">
+        <div class="sidebar">
+            <div>
+                <h1>☁ CloudSync AI</h1>
+                <a href="/dashboard">📂 Dashboard</a>
+                <a href="/upload">⬆ Upload Files</a>
+                <a href="/search">🤖 AI Search</a>
+                <a href="/analytics">📊 Analytics</a>
+                <a href="/settings" class="active-link">⚙ Settings</a>
+            </div>
+            <a href="/logout" class="logout-btn">🚪 Logout</a>
+        </div>
 
-<div class="settings-container">
+        <div class="main-content">
+            <div class="topbar">
+                <div>
+                    <h2>Settings</h2>
+                    <p class="top-text">Manage your intelligent cloud preferences</p>
+                </div>
+                <div class="profile-box">
+                    {{ session.get('user', 'User') }}
+                </div>
+            </div>
 
-<h1>⚙ System Settings</h1>
+            <div class="table-section">
+                <div class="table-header">
+                    <h2>System Preferences</h2>
+                </div>
+                
+                <form action="/settings/save" method="POST">
+                    <div class="setting-item">
+                        <h3>☁ Cloud Sync</h3>
+                        <label class="switch">
+                            <input type="checkbox" name="cloud_sync" {% if settings.get('cloud_sync') == 'Enabled' %}checked{% endif %}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
 
-<div class="settings-card">
+                    <div class="setting-item">
+                        <h3>🔐 Encryption</h3>
+                        <label class="switch">
+                            <input type="checkbox" name="encryption" {% if settings.get('encryption') == 'Enabled' %}checked{% endif %}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
 
-<div class="setting-item">
+                    <div class="setting-item">
+                        <h3>🤖 AI Features</h3>
+                        <label class="switch">
+                            <input type="checkbox" name="ai_features" {% if settings.get('ai_features') == 'Enabled' %}checked{% endif %}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
 
-<span>☁ Cloud Sync</span>
+                    <div class="setting-item">
+                        <h3>🌙 Dark Mode</h3>
+                        <label class="switch">
+                            <input type="checkbox" id="dark-mode-checkbox" name="dark_mode" onclick="toggleDarkMode()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
 
-<label class="switch">
+                    <div class="setting-item">
+                        <h3>📢 Notifications</h3>
+                        <label class="switch">
+                            <input type="checkbox" name="notifications" {% if settings.get('notifications') == 'Enabled' %}checked{% endif %}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
 
-<input type="checkbox" checked>
-
-<span class="slider"></span>
-
-</label>
-
-</div>
-
-<div class="setting-item">
-
-<span>🔐 Encryption</span>
-
-<label class="switch">
-
-<input type="checkbox" checked>
-
-<span class="slider"></span>
-
-</label>
-
-</div>
-
-<div class="setting-item">
-
-<span>🤖 AI Features</span>
-
-<label class="switch">
-
-<input type="checkbox" checked>
-
-<span class="slider"></span>
-
-</label>
-
-</div>
-
-<div class="setting-item">
-
-<span>🌙 Dark Mode</span>
-
-<label class="switch">
-
-<input type="checkbox" checked>
-
-<span class="slider"></span>
-
-</label>
-
-</div>
-
-<div class="setting-item">
-
-<span>📢 Notifications</span>
-
-<label class="switch">
-
-<input type="checkbox">
-
-<span class="slider"></span>
-
-</label>
-
-</div>
-
-<button class="save-btn">
-
-Save Settings
-
-</button>
-
-</div>
-
-</div>
-
+                    <button type="submit" class="download-btn" style="margin-top:30px; cursor: pointer; border: none;">
+                        Save Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

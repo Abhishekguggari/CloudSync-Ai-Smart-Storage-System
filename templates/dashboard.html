@@ -1,388 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>Dashboard | CloudSync AI</title>
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | CloudSync AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-
-<div class="dashboard">
-
-<!-- SIDEBAR -->
-
-<div class="sidebar">
-
-<div>
-
-<h1>☁ CloudSync AI</h1>
-
-<a href="/dashboard" class="active-link">
-📂 Dashboard
-</a>
-
-<a href="/upload">
-⬆ Upload Files
-</a>
-
-<a href="/search">
-🤖 AI Search
-</a>
-
-<a href="/analytics">
-📊 Analytics
-</a>
-
-<a href="/settings">
-⚙ Settings
-</a>
-
-</div>
-
-<a href="/logout"
-class="logout-btn">
-
-🚪 Logout
-
-</a>
-
-</div>
-
-<!-- MAIN CONTENT -->
-
-<div class="main-content">
-
-<!-- TOPBAR -->
-
-<div class="topbar">
-
-<div>
-
-<h2>
-{% if admin_mode %}
-🛡️ Admin System Control Panel
-{% else %}
-Welcome,
-{{ session.get('user', 'User') }}
-👋
-{% endif %}
-</h2>
-
-<p class="top-text">
-{% if admin_mode %}
-Complete system-wide overview of all users, files and security activity
-{% else %}
-Manage, secure and synchronize your cloud files intelligently
-{% endif %}
-</p>
-
-</div>
-
-<div class="profile-box">
-
-☁ Premium User
-
-</div>
-
-</div>
-
-{% if admin_mode %}
-<!-- ADMIN USERS OVERVIEW -->
-<div class="storage-card" style="margin-bottom: 30px; background: rgba(255,255,255,0.08); padding: 25px; border-radius: 20px;">
-    <h3 style="color: #60a5fa; margin-bottom: 15px;">👥 Registered Users</h3>
-    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-        {% for u in users %}
-        <div style="background: rgba(255,255,255,0.05); padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-            <strong style="color: #e2e8f0;">{{ u[1] }}</strong> <br>
-            <span style="color: #94a3b8; font-size: 12px;">{{ u[2] }}</span>
+    <div class="dashboard">
+        <div class="sidebar">
+            <div>
+                <h1>☁ CloudSync AI</h1>
+                <a href="/dashboard" class="active-link">📂 Dashboard</a>
+                <a href="/upload">⬆ Upload Files</a>
+                <a href="/search">🤖 AI Search</a>
+                <a href="/analytics">📊 Analytics</a>
+                <a href="/settings">⚙ Settings</a>
+            </div>
+            <a href="/logout" class="logout-btn">🚪 Logout</a>
         </div>
-        {% endfor %}
+
+        <div class="main-content">
+            <div class="topbar">
+                <div>
+                    <h2>
+                        {% if admin_mode %}
+                        🛡️ Admin System Control Panel
+                        {% else %}
+                        Welcome, {{ session.get('user', 'User') }} 👋
+                        {% endif %}
+                    </h2>
+                    <p class="top-text">
+                        {% if admin_mode %}
+                        Complete system-wide overview of all users, files and security activity
+                        {% else %}
+                        Manage, secure and synchronize your cloud files intelligently
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="profile-box">☁ Premium User</div>
+            </div>
+
+            {% if admin_mode %}
+            <div class="storage-card" style="margin-bottom: 30px; background: rgba(255,255,255,0.08); padding: 25px; border-radius: 20px;">
+                <h3 style="color: #60a5fa; margin-bottom: 15px;">👥 Registered Users</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    {% for u in users %}
+                    <div style="background: rgba(255,255,255,0.05); padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                        <strong style="color: #e2e8f0;">{{ u[1] }}</strong> <br>
+                        <span style="color: #94a3b8; font-size: 12px;">{{ u[2] }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="cards">
+                <div class="card">
+                    <h3>Total Files</h3>
+                    <p>{{ files|length }}</p>
+                    <span class="card-status">Active Storage</span>
+                </div>
+                <div class="card">
+                    <h3>Cloud Sync</h3>
+                    <p>Enabled</p>
+                    <span class="card-status synced-text">Synced</span>
+                </div>
+                <div class="card">
+                    <h3>AI Detection</h3>
+                    <p>Smart Scan</p>
+                    <span class="card-status">Running</span>
+                </div>
+                <div class="card">
+                    <h3>Security</h3>
+                    <p>Encrypted</p>
+                    <span class="card-status secure-text">Protected</span>
+                </div>
+            </div>
+
+            <div class="storage-card">
+                <div class="storage-top">
+                    <h3>Storage Usage</h3>
+                    <p>{{ storage_percent }}% Used</p>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ storage_percent }}%;"></div>
+                </div>
+                <p class="storage-text">
+                    {{ storage_used }} used of 15.00 GB cloud storage limit
+                </p>
+            </div>
+
+            <div class="quick-actions">
+                <a href="/upload" class="quick-btn">⬆ Upload New File</a>
+                <a href="/search" class="quick-btn">🤖 Smart Search</a>
+                <a href="/analytics" class="quick-btn">📊 View Analytics</a>
+            </div>
+
+            <div class="table-section">
+                <div class="table-header">
+                    <h2>Your Files</h2>
+                    <input type="text" placeholder="Search files...">
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Category</th>
+                            <th>Duplicate Status</th>
+                            <th>Cloud Sync</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if files %}
+                        {% for file in files %}
+                        <tr>
+                            <td>
+                                📄 {{ file[2] }}
+                                {% if admin_mode %}
+                                <br><span style="font-size: 11px; background: #3b82f6; color: white; padding: 2px 8px; border-radius: 10px; margin-top: 5px; display: inline-block;">User: {{ file[1] }}</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if file[3] == "Image" %}
+                                🖼 Image
+                                {% elif file[3] == "Document" %}
+                                📄 Document
+                                {% elif file[3] == "Video" %}
+                                🎥 Video
+                                {% else %}
+                                📁 Other
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if "Duplicate" in file[4] %}
+                                <span class="duplicate-badge">⚠ Duplicate</span>
+                                {% else %}
+                                <span class="safe-badge">✅ Unique</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if file[5] == 'Pending' %}
+                                    <a href="/sync/{{ file[0] }}" style="background-color: #f0ad4e; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">Sync to Cloud</a>
+                                {% else %}
+                                    <span style="color: #5cb85c; font-weight: bold;">✔ Synced</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <a href="/download/{{ file[2] }}">
+                                    <button class="download-btn">Download</button>
+                                </a>
+                                <a href="/delete/{{ file[2] }}">
+                                    <button class="delete-btn">Delete</button>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="empty-state">No files uploaded yet ☁</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-</div>
-{% endif %}
-
-<!-- ANALYTICS CARDS -->
-
-<div class="cards">
-
-<div class="card">
-
-<h3>Total Files</h3>
-
-<p>{{ files|length }}</p>
-
-<span class="card-status">
-Active Storage
-</span>
-
-</div>
-
-<div class="card">
-
-<h3>Cloud Sync</h3>
-
-<p>Enabled</p>
-
-<span class="card-status synced-text">
-Synced
-</span>
-
-</div>
-
-<div class="card">
-
-<h3>AI Detection</h3>
-
-<p>Smart Scan</p>
-
-<span class="card-status">
-Running
-</span>
-
-</div>
-
-<div class="card">
-
-<h3>Security</h3>
-
-<p>Encrypted</p>
-
-<span class="card-status secure-text">
-Protected
-</span>
-
-</div>
-
-</div>
-
-<!-- STORAGE BAR -->
-
-<div class="storage-card">
-
-<div class="storage-top">
-
-<h3>Storage Usage</h3>
-
-<p>68% Used</p>
-
-</div>
-
-<div class="progress-bar">
-
-<div class="progress-fill"></div>
-
-</div>
-
-<p class="storage-text">
-14.2 GB used of 20 GB cloud storage
-</p>
-
-</div>
-
-<!-- QUICK ACTIONS -->
-
-<div class="quick-actions">
-
-<a href="/upload"
-class="quick-btn">
-
-⬆ Upload New File
-
-</a>
-
-<a href="/search"
-class="quick-btn">
-
-🤖 Smart Search
-
-</a>
-
-<a href="/analytics"
-class="quick-btn">
-
-📊 View Analytics
-
-</a>
-
-</div>
-
-<!-- FILE TABLE -->
-
-<div class="table-section">
-
-<div class="table-header">
-
-<h2>Your Files</h2>
-
-<input
-type="text"
-placeholder="Search files...">
-
-</div>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>File Name</th>
-
-<th>Category</th>
-
-<th>Duplicate Status</th>
-
-<th>Cloud Sync</th>
-
-<th>Actions</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-{% if files %}
-
-{% for file in files %}
-
-<tr>
-
-<!-- FILE NAME -->
-
-<td>
-
-📄 {{ file[2] }}
-{% if admin_mode %}
-<br><span style="font-size: 11px; background: #3b82f6; color: white; padding: 2px 8px; border-radius: 10px; margin-top: 5px; display: inline-block;">User: {{ file[1] }}</span>
-{% endif %}
-
-</td>
-
-<!-- CATEGORY -->
-
-<td>
-
-{% if file[3] == "Image" %}
-
-🖼 Image
-
-{% elif file[3] == "Document" %}
-
-📄 Document
-
-{% elif file[3] == "Video" %}
-
-🎥 Video
-
-{% else %}
-
-📁 Other
-
-{% endif %}
-
-</td>
-
-<!-- DUPLICATE -->
-
-<td>
-
-{% if "Duplicate" in file[4] %}
-
-<span class="duplicate-badge">
-
-⚠ Duplicate
-
-</span>
-
-{% else %}
-
-<span class="safe-badge">
-
-✅ Unique
-
-</span>
-
-{% endif %}
-
-</td>
-
-<!-- CLOUD STATUS -->
-
-<td>
-
-<span class="status synced">
-
-{{ file[5] }}
-
-</span>
-
-</td>
-
-<!-- ACTIONS -->
-
-<td>
-
-<a href="/download/{{ file[2] }}">
-
-<button class="download-btn">
-
-Download
-
-</button>
-
-</a>
-
-<a href="/delete/{{ file[2] }}">
-
-<button class="delete-btn">
-
-Delete
-
-</button>
-
-</a>
-
-</td>
-
-</tr>
-
-{% endfor %}
-
-{% else %}
-
-<tr>
-
-<td colspan="5"
-class="empty-state">
-
-No files uploaded yet ☁
-
-</td>
-
-</tr>
-
-{% endif %}
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
-
 </body>
 </html>
