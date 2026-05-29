@@ -714,6 +714,7 @@ font-weight:bold;
 
 /* TABLE BUTTONS */
 
+.share-btn,
 .download-btn,
 .delete-btn{
 
@@ -738,6 +739,12 @@ background:#2563eb;
 .delete-btn{
 
 background:#dc2626;
+
+}
+
+.share-btn{
+
+background:#10b981;
 
 }
 

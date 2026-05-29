@@ -12,6 +12,7 @@ content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet"
 href="{{ url_for('static', filename='style.css') }}">
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 
 <style>
 
@@ -276,6 +277,7 @@ gap:12px;
 
 }
 
+.share-btn,
 .download-btn,
 .delete-btn{
 
@@ -286,6 +288,12 @@ padding:10px 18px;
 border-radius:12px;
 
 margin-top:0;
+
+}
+
+.share-btn{
+
+background:#10b981;
 
 }
 
@@ -306,6 +314,31 @@ background:#dc2626;
 </head>
 
 <body>
+
+<div class="dashboard">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+    <div>
+        <h1 onclick="window.location.href='/dashboard'" style="cursor: pointer;" title="Go to Dashboard">☁ CloudSync AI</h1>
+        <a href="/dashboard">📂 Dashboard</a>
+        <a href="/upload">⬆ Upload Files</a>
+        <a href="/search" class="active-link">🤖 AI Search</a>
+        <a href="/analytics">📊 Analytics</a>
+        <a href="/settings">⚙ Settings</a>
+    </div>
+
+    <a href="/check-network" class="network-btn" style="display: block; padding: 12px; margin: 20px 20px; text-align: center; border-radius: 12px; color: white; text-decoration: none; font-weight: bold; transition: 0.3s; background: {{ '#10b981' if session.get('is_online', True) else '#64748b' }};">
+        {{ '🌐 Status: Online' if session.get('is_online', True) else '🔌 Status: Offline' }}
+    </a>
+
+    <a href="/logout" class="logout-btn">🚪 Logout</a>
+
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
 
 <div class="search-page">
 
@@ -357,7 +390,7 @@ Search Files
 
 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
     <h2 style="margin: 0;">📄 {{ file[2] }}</h2>
-    <span class="badge relevance-badge">🤖 {{ file[6] }}% Match</span>
+    <span class="badge relevance-badge">🤖 {{ file[7] }}% Match</span>
 </div>
 
 <!-- CATEGORY -->
@@ -399,6 +432,15 @@ Search Files
 </span>
 
 {% endif %}
+
+</div>
+
+<!-- SUGGESTION / MATCH REASON -->
+
+<div class="info-row">
+
+<strong>AI Insight:</strong>
+<span class="badge" style="background:rgba(255,255,255,0.1); color:#e2e8f0; border: 1px dashed rgba(255,255,255,0.3);">💡 {{ file[8] }}</span>
 
 </div>
 
@@ -446,6 +488,16 @@ Search Files
 
 <div class="action-btns">
 
+<a href="/share/{{ file[2] }}">
+
+<button class="share-btn">
+
+Share
+
+</button>
+
+</a>
+
 <a href="/download/{{ file[2] }}">
 
 <button class="download-btn">
@@ -483,6 +535,10 @@ Delete
 </div>
 
 {% endif %}
+
+</div>
+
+</div>
 
 </div>
 

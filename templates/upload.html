@@ -12,6 +12,7 @@ content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet"
 href="{{ url_for('static', filename='style.css') }}">
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 
 <style>
 
@@ -112,6 +113,8 @@ line-height:1.6;
 
 .drop-area{
 
+display:block;
+
 padding:45px;
 
 border:
@@ -160,13 +163,21 @@ font-size:14px;
 
 .file-input{
 
-display:none;
+opacity:0;
+
+position:absolute;
+
+z-index:-1;
 
 }
 
 /* BUTTON */
 
 .upload-btn{
+
+display:block;
+
+margin:0 auto;
 
 width:240px;
 
@@ -314,7 +325,7 @@ font-size:34px;
 
 <div>
 
-<h1>☁ CloudSync AI</h1>
+<h1 onclick="window.location.href='/dashboard'" style="cursor: pointer;" title="Go to Dashboard">☁ CloudSync AI</h1>
 
 <a href="/dashboard">
 📂 Dashboard
@@ -338,6 +349,10 @@ class="active-link">
 </a>
 
 </div>
+
+<a href="/check-network" class="network-btn" style="display: block; padding: 12px; margin: 20px 20px; text-align: center; border-radius: 12px; color: white; text-decoration: none; font-weight: bold; transition: 0.3s; background: {{ '#10b981' if session.get('is_online', True) else '#64748b' }};">
+    {{ '🌐 Status: Online' if session.get('is_online', True) else '🔌 Status: Offline' }}
+</a>
 
 <a href="/logout"
 class="logout-btn">
@@ -372,7 +387,9 @@ Upload, encrypt and synchronize files intelligently using CloudSync AI
 
 <div class="upload-icon">
 
-☁
+<video autoplay loop muted playsinline style="width: 180px; height: 180px; object-fit: contain; pointer-events: none;">
+    <source src="{{ url_for('static', filename='gifs/upload.mp4') }}" type="video/mp4">
+</video>
 
 </div>
 
@@ -389,15 +406,8 @@ enctype="multipart/form-data">
 
 <label class="drop-area">
 
-<h3>
-📂 Drag & Drop Files Here
-</h3>
-
-<span>
-or click below to browse files
-</span>
-
-<br><br>
+<h3>📂 Drag & Drop Files Here</h3>
+<p>or click to browse files</p>
 
 <input
 type="file"
@@ -405,15 +415,7 @@ name="file"
 class="file-input"
 required>
 
-<div class="upload-btn">
-
-Choose File
-
-</div>
-
 </label>
-
-<br>
 
 <button
 type="submit"

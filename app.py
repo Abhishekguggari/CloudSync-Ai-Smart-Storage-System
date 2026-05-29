@@ -20,7 +20,7 @@ from modules.activity import log_activity
 from modules.auth import register_user, login_user
 from modules.search import search_files
 from modules.analytics import get_analytics
-from modules.settings import get_settings
+from modules.settings import get_settings, save_settings
 from modules.sharing import share_file as generate_share_link
 
 from config import UPLOAD_FOLDER
@@ -36,6 +36,18 @@ app.config['CLOUD_BUCKET'] = os.path.join(os.path.dirname(__file__), 'cloud_buck
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(app.config['CLOUD_BUCKET'], exist_ok=True)
+
+# =========================
+# NETWORK CHECKER
+# =========================
+def check_internet_connection():
+    import socket
+    try:
+        # Attempt to connect to Google's public DNS to verify real internet access
+        socket.create_connection(("8.8.8.8", 53), timeout=3)
+        return True
+    except OSError:
+        return False
 
 # =========================
 # STORAGE CALCULATION
@@ -151,11 +163,18 @@ def upload_file():
         file_bytes = file.read()
         file.seek(0)
 
-        import hashlib
-        current_hash = hashlib.md5(file_bytes).hexdigest()
-        duplicate = detect_duplicate(session['user'], current_hash)
-
         final_filename = file.filename
+        
+        user_settings = get_settings(session['user'])
+
+        if user_settings.get('ai_features', 'Enabled') == 'Enabled':
+            import hashlib
+            current_hash = hashlib.md5(file_bytes).hexdigest()
+            duplicate = detect_duplicate(session['user'], current_hash)
+        else:
+            current_hash = "N/A"
+            duplicate = "Unique"
+
         path = os.path.join(app.config['UPLOAD_FOLDER'], final_filename)
         
         counter = 1
@@ -166,9 +185,23 @@ def upload_file():
             counter += 1
 
         file.save(path)
-        encrypt_file(path)
 
-        category = categorize_file(final_filename)
+        if user_settings.get('encryption', 'Enabled') == 'Enabled':
+            encrypt_file(path)
+
+        if user_settings.get('cloud_sync', 'Enabled') == 'Enabled':
+            # Check real physical network status before syncing
+            is_online = check_internet_connection()
+            session['is_online'] = is_online
+            
+            if is_online:
+                sync_result = sync_to_cloud(path, app.config['CLOUD_BUCKET'])
+            else:
+                sync_result = 'Not Synced'
+        else:
+            sync_result = 'Sync Disabled'
+
+        category = categorize_file(final_filename) if user_settings.get('ai_features', 'Enabled') == 'Enabled' else "Uncategorized"
 
         conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
@@ -177,7 +210,7 @@ def upload_file():
             INSERT INTO files (username, filename, category, duplicate_status, sync_status, file_hash)
             VALUES (?, ?, ?, ?, ?, ?)
             ''',
-            (session['user'], final_filename, category, duplicate, 'Pending', current_hash)
+            (session['user'], final_filename, category, duplicate, sync_result, current_hash)
         )
         conn.commit()
         conn.close()
@@ -187,12 +220,55 @@ def upload_file():
     return redirect('/dashboard')
 
 # =========================
+# NETWORK STATUS CHECK & BULK SYNC
+# =========================
+@app.route('/check-network')
+def check_network():
+    if 'user' not in session:
+        return redirect('/')
+        
+    was_offline = not session.get('is_online', True)
+    
+    # Check actual real connection
+    is_online = check_internet_connection()
+    session['is_online'] = is_online
+    
+    # If we transitioned from offline to online, sync pending files
+    if is_online and was_offline:
+        user_settings = get_settings(session['user'])
+        if user_settings.get('cloud_sync', 'Enabled') == 'Enabled':
+            # Sync pending offline files
+            conn = sqlite3.connect('database.db')
+            cursor = conn.cursor()
+            cursor.execute('SELECT id, filename FROM files WHERE username=? AND sync_status IN (?, ?)', (session['user'], 'Not Synced', 'Sync Disabled'))
+            unsynced_files = cursor.fetchall()
+            
+            for file_id, filename in unsynced_files:
+                path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                if os.path.exists(path):
+                    sync_result = sync_to_cloud(path, app.config['CLOUD_BUCKET'])
+                    cursor.execute('UPDATE files SET sync_status=? WHERE id=?', (sync_result, file_id))
+            
+            conn.commit()
+            conn.close()
+            log_activity(f"{session['user']} network restored and bulk synced pending files.")
+
+    return redirect(request.referrer or '/dashboard')
+
+# =========================
 # SIMULATED CLOUD SYNC ROUTE
 # =========================
 @app.route('/sync/<int:file_id>')
 def sync_file_to_local_cloud(file_id):
     if 'user' not in session:
         return redirect('/')
+
+    # Prevent manual sync if offline
+    if not session.get('is_online', True):
+        return redirect('/dashboard')
+    if not check_internet_connection():
+        session['is_online'] = False
+        return redirect('/dashboard')
 
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
@@ -235,7 +311,7 @@ def search():
     results = []
     if request.method == 'POST':
         keyword = request.form['keyword']
-        results = search_files(keyword)
+        results = search_files(keyword, session['user'])
 
     return render_template('search.html', results=results)
 
@@ -277,13 +353,84 @@ def analytics():
 # =========================
 # SETTINGS PAGE VIEW
 # =========================
-@app.route('/settings')
+@app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if 'user' not in session:
         return redirect('/')
 
-    settings_data = get_settings()
+    if request.method == 'POST':
+        cloud_sync = request.form.get('cloud_sync', 'Disabled')
+        encryption = request.form.get('encryption', 'Disabled')
+        ai_features = request.form.get('ai_features', 'Disabled')
+        dark_mode = request.form.get('dark_mode', 'Disabled')
+        notifications = request.form.get('notifications', 'Disabled')
+        
+        settings_data = {
+            'cloud_sync': cloud_sync,
+            'encryption': encryption,
+            'ai_features': ai_features,
+            'dark_mode': dark_mode,
+            'notifications': notifications
+        }
+        save_settings(session['user'], settings_data)
+        return redirect('/settings')
+
+    settings_data = get_settings(session['user'])
     return render_template('settings.html', settings=settings_data)
+
+# =========================
+# SAVE SETTINGS ACTION
+# =========================
+@app.route('/save_settings', methods=['GET', 'POST'], strict_slashes=False)
+@app.route('/save-settings', methods=['GET', 'POST'], strict_slashes=False)
+@app.route('/save', methods=['GET', 'POST'], strict_slashes=False)
+@app.route('/update_settings', methods=['GET', 'POST'], strict_slashes=False)
+@app.route('/settings/save', methods=['GET', 'POST'], strict_slashes=False)
+def handle_save_settings():
+    if 'user' not in session:
+        return redirect('/')
+
+    # Support both POST (form data) and GET (query parameters)
+    source = request.form if request.method == 'POST' else request.args
+
+    # If it's an empty GET request, just redirect back to the settings page
+    if request.method == 'GET' and not source:
+        return redirect('/settings')
+
+    cloud_sync = source.get('cloud_sync', 'Disabled')
+    encryption = source.get('encryption', 'Disabled')
+    ai_features = source.get('ai_features', 'Disabled')
+    dark_mode = source.get('dark_mode', 'Disabled')
+    notifications = source.get('notifications', 'Disabled')
+    
+    settings_data = {
+        'cloud_sync': cloud_sync,
+        'encryption': encryption,
+        'ai_features': ai_features,
+        'dark_mode': dark_mode,
+        'notifications': notifications
+    }
+    save_settings(session['user'], settings_data)
+
+    # Automatically sync files if auto-sync was turned back on and internet is available
+    if cloud_sync == 'Enabled':
+        if check_internet_connection():
+            session['is_online'] = True
+            conn = sqlite3.connect('database.db')
+            cursor = conn.cursor()
+            cursor.execute('SELECT id, filename FROM files WHERE username=? AND sync_status IN (?, ?)', (session['user'], 'Not Synced', 'Sync Disabled'))
+            unsynced_files = cursor.fetchall()
+            
+            for file_id, filename in unsynced_files:
+                path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                if os.path.exists(path):
+                    sync_result = sync_to_cloud(path, app.config['CLOUD_BUCKET'])
+                    cursor.execute('UPDATE files SET sync_status=? WHERE id=?', (sync_result, file_id))
+            
+            conn.commit()
+            conn.close()
+
+    return redirect('/settings')
 
 # =========================
 # DARK MODE TOGGLE

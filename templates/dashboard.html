@@ -5,18 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | CloudSync AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
     <div class="dashboard">
         <div class="sidebar">
             <div>
-                <h1>☁ CloudSync AI</h1>
+                <h1 onclick="window.location.href='/dashboard'" style="cursor: pointer;" title="Go to Dashboard">☁ CloudSync AI</h1>
                 <a href="/dashboard" class="active-link">📂 Dashboard</a>
                 <a href="/upload">⬆ Upload Files</a>
                 <a href="/search">🤖 AI Search</a>
                 <a href="/analytics">📊 Analytics</a>
                 <a href="/settings">⚙ Settings</a>
             </div>
+            
+            <a href="/check-network" class="network-btn" style="display: block; padding: 12px; margin: 20px 20px; text-align: center; border-radius: 12px; color: white; text-decoration: none; font-weight: bold; transition: 0.3s; background: {{ '#10b981' if session.get('is_online', True) else '#64748b' }};">
+                {{ '🌐 Status: Online' if session.get('is_online', True) else '🔌 Status: Offline' }}
+            </a>
+
             <a href="/logout" class="logout-btn">🚪 Logout</a>
         </div>
 
@@ -144,14 +150,25 @@
                             </td>
 
                             <td>
-                                {% if file[5] == 'Pending' %}
-                                    <a href="/sync/{{ file[0] }}" style="background-color: #f0ad4e; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">Sync to Cloud</a>
+                                {% if file[5] == 'Synced' %}
+                                    <span style="color: #10b981; font-weight: bold;">✅ Synced</span>
+                                {% elif file[5] == 'Sync Disabled' %}
+                                    <span style="color: #f59e0b; font-weight: bold;">⛔ Auto-Sync Off</span>
+                                    {% if session.get('is_online', True) %}
+                                    <a href="/sync/{{ file[0] }}" style="background-color: #3b82f6; color: white; padding: 4px 8px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 12px; margin-left: 8px;">Sync Now</a>
+                                    {% endif %}
                                 {% else %}
-                                    <span style="color: #5cb85c; font-weight: bold;">✔ Synced</span>
+                                    <span style="color: #64748b; font-weight: bold;">⏸ Not Synced</span>
+                                    {% if session.get('is_online', True) %}
+                                    <a href="/sync/{{ file[0] }}" style="background-color: #3b82f6; color: white; padding: 4px 8px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 12px; margin-left: 8px;">Sync Now</a>
+                                    {% endif %}
                                 {% endif %}
                             </td>
 
                             <td>
+                                <a href="/share/{{ file[2] }}">
+                                    <button class="share-btn">Share</button>
+                                </a>
                                 <a href="/download/{{ file[2] }}">
                                     <button class="download-btn">Download</button>
                                 </a>
