@@ -27,6 +27,14 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     document.head.appendChild(style);
 
+    // ISOLATE AND ENHANCE CLOUD ICON GLOBALLY
+    const cloudElements = document.querySelectorAll('.sidebar h1, .logo');
+    cloudElements.forEach(el => {
+        if (el.innerHTML.includes('☁')) {
+            el.innerHTML = el.innerHTML.replace('☁', '<span class="cloud-icon"></span>');
+        }
+    });
+
     const darkToggle =
         document.getElementById("darkModeToggle");
 

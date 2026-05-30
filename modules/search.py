@@ -49,7 +49,34 @@ def search_files(keyword, username):
             try:
                 # Safely decrypt the file and decode to text (ignores unreadable binary data like images)
                 decrypted_bytes = decrypt_file(filepath)
-                content_str = decrypted_bytes.decode('utf-8', errors='ignore').lower()
+                content_str = ""
+                
+                # Extract text depending on document type
+                if filename.lower().endswith('.pdf'):
+                    try:
+                        import PyPDF2
+                        import io
+                        pdf_reader = PyPDF2.PdfReader(io.BytesIO(decrypted_bytes))
+                        for page in pdf_reader.pages:
+                            text = page.extract_text()
+                            if text:
+                                content_str += text.lower() + " "
+                    except Exception:
+                        # Fallback if PyPDF2 is missing or file is malformed
+                        content_str = decrypted_bytes.decode('utf-8', errors='ignore').lower()
+                        
+                elif filename.lower().endswith('.docx'):
+                    try:
+                        import zipfile
+                        import io
+                        import re
+                        with zipfile.ZipFile(io.BytesIO(decrypted_bytes)) as docx_zip:
+                            xml_content = docx_zip.read('word/document.xml').decode('utf-8')
+                            content_str = re.sub(r'<[^>]+>', ' ', xml_content).lower()
+                    except Exception:
+                        content_str = decrypted_bytes.decode('utf-8', errors='ignore').lower()
+                else:
+                    content_str = decrypted_bytes.decode('utf-8', errors='ignore').lower()
                 
                 if keyword_lower in content_str:
                     max_score = max(max_score, 0.9)  # Very high confidence if found in text

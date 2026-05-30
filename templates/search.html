@@ -26,6 +26,10 @@ min-height:100vh;
 
 .search-header{
 
+display:flex;
+
+align-items:center;
+
 margin-bottom:35px;
 
 }
@@ -329,8 +333,13 @@ background:#dc2626;
         <a href="/settings">⚙ Settings</a>
     </div>
 
-    <a href="/check-network" class="network-btn" style="display: block; padding: 12px; margin: 20px 20px; text-align: center; border-radius: 12px; color: white; text-decoration: none; font-weight: bold; transition: 0.3s; background: {{ '#10b981' if session.get('is_online', True) else '#64748b' }};">
-        {{ '🌐 Status: Online' if session.get('is_online', True) else '🔌 Status: Offline' }}
+    <a href="/check-network" class="network-btn" style="position: relative; display: flex; align-items: center; justify-content: center; min-height: 85px; margin: 20px; border-radius: 16px; color: #ffffff; text-decoration: none; font-weight: 800; transition: 0.3s; overflow: hidden; background: {{ 'rgba(16, 185, 129, 0.4)' if session.get('is_online', True) else 'rgba(100, 116, 139, 0.4)' }}; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        <video autoplay loop muted playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0.85; pointer-events: none;">
+            <source src="{{ url_for('static', filename='gifs/online.mp4' if session.get('is_online', True) else 'gifs/offline.mp4') }}" type="video/mp4">
+        </video>
+        <span style="position: relative; z-index: 1; font-size: 17px; letter-spacing: 0.5px; text-shadow: 0 2px 8px #000, 0 0 5px #000, 0 0 2px #000;">
+            {{ '🌐 Status: Online' if session.get('is_online', True) else '🔌 Status: Offline' }}
+        </span>
     </a>
 
     <a href="/logout" class="logout-btn">🚪 Logout</a>
@@ -346,11 +355,21 @@ background:#dc2626;
 
 <div class="search-header">
 
-<h1>🤖 AI Smart Search</h1>
+<div style="margin-right: 25px;">
+<video autoplay loop muted playsinline style="width: 180px; height: 180px; object-fit: contain; pointer-events: none; animation: floatCloud 3s ease-in-out infinite;">
+    <source src="{{ url_for('static', filename='gifs/bot.mp4') }}" type="video/mp4">
+</video>
+</div>
 
-<p>
-Search and discover files intelligently using CloudSync AI
-</p>
+<div>
+
+    <h1>AI Smart Search</h1>
+
+    <p>
+    Search and discover files intelligently using CloudSync AI
+    </p>
+
+</div>
 
 </div>
 

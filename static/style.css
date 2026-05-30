@@ -21,6 +21,8 @@ min-height:100vh;
 
 overflow-x:hidden;
 
+animation: fadeInBody 0.6s ease-out;
+
 }
 
 /* BACKGROUND */
@@ -66,11 +68,13 @@ backdrop-filter:blur(20px);
 box-shadow:
 0 8px 40px rgba(0,0,0,0.45);
 
+animation: scaleUp 0.6s ease-out backwards;
+
 }
 
 .logo{
 
-font-size:34px;
+font-size:42px;
 
 font-weight:bold;
 
@@ -138,8 +142,8 @@ input:focus{
 border:
 1px solid #60a5fa;
 
-background:
-rgba(255,255,255,0.12);
+background: rgba(255,255,255,0.12);
+transform: translateY(-2px);
 
 box-shadow:
 0 0 12px rgba(96,165,250,0.4);
@@ -210,6 +214,10 @@ box-shadow:
 
 }
 
+button:active{
+transform: translateY(1px) scale(0.98);
+}
+
 /* LINKS */
 
 .bottom-text{
@@ -264,11 +272,13 @@ justify-content:space-between;
 border-right:
 1px solid rgba(255,255,255,0.08);
 
+animation: slideInLeft 0.5s ease-out backwards;
+
 }
 
 .sidebar h1{
 
-font-size:30px;
+font-size:38px;
 
 margin-bottom:40px;
 
@@ -297,12 +307,9 @@ font-weight:500;
 }
 
 .sidebar a:hover{
-
-background:
-rgba(255,255,255,0.08);
-
-transform:translateX(5px);
-
+background: rgba(255,255,255,0.1);
+transform: translateX(8px);
+box-shadow: -4px 0 0 0 #60a5fa;
 }
 
 .active-link{
@@ -347,6 +354,8 @@ justify-content:space-between;
 align-items:center;
 
 margin-bottom:35px;
+
+animation: fadeInDown 0.6s ease-out backwards;
 
 }
 
@@ -651,8 +660,8 @@ transition:0.3s;
 
 tr:hover{
 
-background:
-rgba(255,255,255,0.03);
+background: rgba(255,255,255,0.06);
+box-shadow: inset 4px 0 0 0 #60a5fa;
 
 }
 
@@ -792,6 +801,9 @@ rgba(255,255,255,0.1);
 border:
 2px dashed #60a5fa;
 
+transform: scale(1.02);
+box-shadow: 0 12px 30px rgba(96,165,250,0.15);
+
 }
 
 .upload-icon{
@@ -826,4 +838,113 @@ flex-direction:column;
 
 }
 
+}
+
+/* =========================
+   MODERN UI & ANIMATIONS
+   ========================= */
+
+@keyframes fadeInUp {
+from { opacity: 0; transform: translateY(20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseAlert {
+0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.4); }
+70% { box-shadow: 0 0 0 10px rgba(250, 204, 21, 0); }
+100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+}
+
+.card {
+animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.cards .card:nth-child(1) { animation-delay: 0.1s; }
+.cards .card:nth-child(2) { animation-delay: 0.2s; }
+.cards .card:nth-child(3) { animation-delay: 0.3s; }
+.cards .card:nth-child(4) { animation-delay: 0.4s; }
+
+.table-section, .storage-card, .upload-box {
+animation: fadeInUp 0.8s ease-out backwards;
+animation-delay: 0.2s;
+}
+
+.progress-fill {
+transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.secure-text {
+animation: pulseAlert 2s infinite;
+border-radius: 20px;
+}
+
+.delete-btn {
+transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.delete-btn:hover {
+transform: scale(1.05);
+}
+
+@keyframes fadeInBody {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+from { opacity: 0; transform: scale(0.95); }
+to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInLeft {
+from { opacity: 0; transform: translateX(-30px); }
+to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInDown {
+from { opacity: 0; transform: translateY(-20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+tbody tr {
+animation: fadeInUp 0.5s ease-out backwards;
+}
+
+tbody tr:nth-child(1) { animation-delay: 0.1s; }
+tbody tr:nth-child(2) { animation-delay: 0.2s; }
+tbody tr:nth-child(3) { animation-delay: 0.3s; }
+tbody tr:nth-child(4) { animation-delay: 0.4s; }
+tbody tr:nth-child(5) { animation-delay: 0.5s; }
+tbody tr:nth-child(n+6) { animation-delay: 0.6s; }
+
+@keyframes floatCloud {
+0% { transform: translateY(0); }
+50% { transform: translateY(-8px); }
+100% { transform: translateY(0); }
+}
+
+/* =========================
+   DYNAMIC WEATHER CLOUD ICON
+   ========================= */
+
+.cloud-icon {
+display: inline-block;
+font-size: 58px;
+vertical-align: middle;
+margin-right: 8px;
+animation: floatCloud 3s ease-in-out infinite;
+line-height: 0.8;
+}
+
+.cloud-icon::before {
+content: '☁';
+display: inline-block;
+animation: weatherCycle 7.5s infinite;
+}
+
+@keyframes weatherCycle {
+0%, 25% { content: '☁'; text-shadow: 0 0 15px rgba(96, 165, 250, 0.4); }
+30%, 55% { content: '🌧'; text-shadow: 0 12px 15px rgba(59, 130, 246, 0.7); }
+60%, 85% { content: '🌩'; text-shadow: 0 0 25px #facc15, 0 0 45px rgba(250, 204, 21, 0.8); }
+90%, 100% { content: '☁'; text-shadow: 0 0 15px rgba(96, 165, 250, 0.4); }
 }

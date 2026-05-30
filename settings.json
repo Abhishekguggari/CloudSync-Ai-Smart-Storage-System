@@ -3,7 +3,7 @@
         "cloud_sync": "Enabled",
         "encryption": "Enabled",
         "ai_features": "Enabled",
-        "dark_mode": "Enabled",
+        "dark_mode": "Disabled",
         "notifications": "Enabled"
     }
 }
