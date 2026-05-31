@@ -51,6 +51,10 @@ class="active-link">
 ⚙ Settings
 </a>
 
+{% if session.get('role') == 'admin' or session.get('user') == 'admin' %}
+<a href="/admin">🛡️ Admin Panel</a>
+{% endif %}
+
 </div>
 
 <a href="/check-network" class="network-btn" style="position: relative; display: flex; align-items: center; justify-content: center; min-height: 85px; margin: 20px; border-radius: 16px; color: #ffffff; text-decoration: none; font-weight: 800; transition: 0.3s; overflow: hidden; background: {{ 'rgba(16, 185, 129, 0.4)' if session.get('is_online', True) else 'rgba(100, 116, 139, 0.4)' }}; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">

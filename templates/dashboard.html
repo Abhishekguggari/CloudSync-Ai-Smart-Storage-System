@@ -13,11 +13,14 @@
         <div class="sidebar">
             <div>
                 <h1 onclick="window.location.href='/dashboard'" style="cursor: pointer;" title="Go to Dashboard">☁ CloudSync AI</h1>
-                <a href="/dashboard" class="active-link">📂 Dashboard</a>
+                <a href="/dashboard" {% if not admin_mode %}class="active-link"{% endif %}>📂 Dashboard</a>
                 <a href="/upload">⬆ Upload Files</a>
                 <a href="/search">🤖 AI Search</a>
                 <a href="/analytics">📊 Analytics</a>
                 <a href="/settings">⚙ Settings</a>
+                {% if session.get('role') == 'admin' or session.get('user') == 'admin' %}
+                <a href="/admin" {% if admin_mode %}class="active-link"{% endif %}>🛡️ Admin Panel</a>
+                {% endif %}
             </div>
             
             <a href="/check-network" class="network-btn" style="position: relative; display: flex; align-items: center; justify-content: center; min-height: 85px; margin: 20px; border-radius: 16px; color: #ffffff; text-decoration: none; font-weight: 800; transition: 0.3s; overflow: hidden; background: {{ 'rgba(16, 185, 129, 0.4)' if session.get('is_online', True) else 'rgba(100, 116, 139, 0.4)' }}; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
@@ -61,6 +64,16 @@
                     <div style="background: rgba(255,255,255,0.05); padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
                         <strong style="color: #e2e8f0;">{{ u[1] }}</strong> <br>
                         <span style="color: #94a3b8; font-size: 12px;">{{ u[2] }}</span>
+                        <br>
+                        <span style="font-size: 12px; margin-top: 5px; display: inline-block; color: #cbd5e1;">Role: <strong>{{ u[3]|capitalize }}</strong></span>
+                        <div style="margin-top: 10px; display: flex; gap: 8px;">
+                            {% if u[3] == 'user' %}
+                            <a href="/admin/change_role/{{ u[0] }}/admin" style="background: #10b981; color: white; padding: 4px 8px; border-radius: 6px; font-size: 12px; text-decoration: none;">Make Admin</a>
+                            {% else %}
+                            <a href="/admin/change_role/{{ u[0] }}/user" style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 6px; font-size: 12px; text-decoration: none;">Make User</a>
+                            {% endif %}
+                            <a href="/admin/delete_user/{{ u[0] }}" style="background: #dc2626; color: white; padding: 4px 8px; border-radius: 6px; font-size: 12px; text-decoration: none;" onclick="return confirm('Are you sure you want to delete this user completely?');">Delete</a>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>

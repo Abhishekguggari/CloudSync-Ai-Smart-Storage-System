@@ -103,6 +103,24 @@ def calculate_storage():
     return total_size, storage_str, storage_percent
 
 # =========================
+# SESSION ROLE REFRESHER
+# =========================
+@app.before_request
+def refresh_session_role():
+    """Ensures user roles are instantly updated without requiring a relogin."""
+    if 'user' in session:
+        try:
+            conn = sqlite3.connect('database.db')
+            cursor = conn.cursor()
+            cursor.execute("SELECT role FROM users WHERE username=?", (session['user'],))
+            user_record = cursor.fetchone()
+            conn.close()
+            if user_record:
+                session['role'] = user_record[0]
+        except Exception:
+            pass
+
+# =========================
 # HOME LOGIN
 # =========================
 @app.route('/', methods=['GET', 'POST'])
@@ -602,6 +620,34 @@ def admin_change_role(user_id, new_role):
         cursor.execute("UPDATE users SET role=? WHERE id=?", (new_role, user_id))
         conn.commit()
         conn.close()
+    return redirect('/admin')
+
+# =========================
+# ADMIN: DELETE USER
+# =========================
+@app.route('/admin/delete_user/<int:user_id>')
+def admin_delete_user(user_id):
+    if 'user' not in session or (session.get('role') != 'admin' and session['user'] != 'admin'):
+        return "Access Denied"
+        
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT username FROM users WHERE id=?", (user_id,))
+    user_record = cursor.fetchone()
+    
+    if user_record:
+        username_to_delete = user_record[0]
+        
+        # Prevent the admin from accidentally deleting their own account
+        if username_to_delete != session['user']:
+            # Delete the user and all their associated files from the database
+            cursor.execute("DELETE FROM users WHERE id=?", (user_id,))
+            cursor.execute("DELETE FROM files WHERE username=?", (username_to_delete,))
+            conn.commit()
+            log_activity(f"Admin {session['user']} deleted user {username_to_delete}")
+            
+    conn.close()
     return redirect('/admin')
 
 # =========================
