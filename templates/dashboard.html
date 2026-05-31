@@ -8,6 +8,7 @@
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
+    <div class="background-blur"></div>
     <div class="dashboard">
         <div class="sidebar">
             <div>
@@ -49,7 +50,7 @@
                         {% endif %}
                     </p>
                 </div>
-                <div class="profile-box">☁ Premium User</div>
+                <div class="profile-box" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(124, 58, 237, 0.2)); border: 1px solid rgba(139, 92, 246, 0.3); color: #e9d5ff; box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);">✨ Premium User</div>
             </div>
 
             {% if admin_mode %}
@@ -74,18 +75,18 @@
                 </div>
                 <div class="card">
                     <h3>Cloud Sync</h3>
-                    <p>Enabled</p>
-                    <span class="card-status synced-text">Synced</span>
+                    <p>{{ settings.cloud_sync }}</p>
+                    <span class="card-status {% if settings.cloud_sync == 'Enabled' %}synced-text{% endif %}">{% if settings.cloud_sync == 'Enabled' %}Synced{% else %}Disabled{% endif %}</span>
                 </div>
                 <div class="card">
                     <h3>AI Detection</h3>
-                    <p>Smart Scan</p>
-                    <span class="card-status">Running</span>
+                    <p>{{ 'Smart Scan' if settings.ai_features == 'Enabled' else 'Disabled' }}</p>
+                    <span class="card-status">{% if settings.ai_features == 'Enabled' %}Running{% else %}Stopped{% endif %}</span>
                 </div>
                 <div class="card">
                     <h3>Security</h3>
-                    <p>Encrypted</p>
-                    <span class="card-status secure-text">Protected</span>
+                    <p>{{ 'Encrypted' if settings.encryption == 'Enabled' else 'Disabled' }}</p>
+                    <span class="card-status {% if settings.encryption == 'Enabled' %}secure-text{% endif %}">{% if settings.encryption == 'Enabled' %}Protected{% else %}Unprotected{% endif %}</span>
                 </div>
             </div>
 

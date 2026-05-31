@@ -44,7 +44,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         input:checked + .slider {
-            background-color: #3b82f6; /* Modern Blue */
+            background-color: #7c3aed; /* Luxurious Purple */
         }
         input:checked + .slider:before {
             transform: translateX(26px);
@@ -52,6 +52,7 @@
     </style>
 </head>
 <body>
+    <div class="background-blur"></div>
     <div class="dashboard">
         <div class="sidebar">
             <div>
@@ -81,8 +82,8 @@
                     <h2>Settings</h2>
                     <p class="top-text">Manage your intelligent cloud preferences</p>
                 </div>
-                <div class="profile-box">
-                    {{ session.get('user', 'User') }}
+                <div class="profile-box" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(124, 58, 237, 0.2)); border: 1px solid rgba(139, 92, 246, 0.3); color: #e9d5ff; box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);">
+                    ✨ {{ session.get('user', 'User') }}
                 </div>
             </div>
 
@@ -135,8 +136,8 @@
                         </label>
                     </div>
 
-                    <button type="submit" class="download-btn" style="margin-top:30px; cursor: pointer; border: none;">
-                        Save Settings
+                    <button type="submit" class="download-btn" style="margin-top:30px; cursor: pointer; border: none; background: linear-gradient(135deg, #4f46e5, #7c3aed); box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);">
+                        💾 Save Settings
                     </button>
                 </form>
             </div>

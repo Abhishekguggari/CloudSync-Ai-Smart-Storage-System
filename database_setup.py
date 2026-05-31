@@ -4,7 +4,18 @@ conn = sqlite3.connect('database.db')
 
 cursor = conn.cursor()
 
-# USERS TABLE (No changes needed, assuming it exists)
+# USERS TABLE
+cursor.execute(
+    '''
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        email TEXT NOT NULL,
+        password TEXT NOT NULL,
+        role TEXT DEFAULT 'user'
+    )
+    '''
+)
 
 # FILES TABLE
 

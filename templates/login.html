@@ -20,8 +20,8 @@ href="{{ url_for('static', filename='style.css') }}">
 
 <div class="auth-container">
 
-<div class="logo" onclick="window.location.href='/'" style="cursor: pointer;" title="Go to Home">
-☁ CloudSync AI
+<div class="logo" onclick="window.location.href='/'" style="cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;" title="Go to Home">
+<span class="cloud-icon"></span> CloudSync AI
 </div>
 
 <h1>Welcome Back</h1>
@@ -35,17 +35,17 @@ Access your intelligent cloud storage platform
 <input
 type="text"
 name="username"
-placeholder="Username"
+placeholder="👤 Username"
 required>
 
 <input
 type="password"
 name="password"
-placeholder="Password"
+placeholder="🔒 Password"
 required>
 
 <button type="submit">
-Login
+✨ Secure Login
 </button>
 
 <p class="bottom-text">

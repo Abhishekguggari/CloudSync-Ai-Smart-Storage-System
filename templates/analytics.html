@@ -18,6 +18,8 @@ href="{{ url_for('static', filename='style.css') }}">
 
 <body>
 
+<div class="background-blur"></div>
+
 <div class="dashboard">
 
 <!-- SIDEBAR -->
@@ -85,9 +87,9 @@ Monitor cloud storage intelligence and system activity
 
 </div>
 
-<div class="profile-box">
+<div class="profile-box" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(124, 58, 237, 0.2)); border: 1px solid rgba(139, 92, 246, 0.3); color: #e9d5ff; box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);">
 
-{{ session.get('user', 'User') }}
+✨ {{ session.get('user', 'User') }}
 
 </div>
 
@@ -137,7 +139,7 @@ Monitor cloud storage intelligence and system activity
 
 <h3>Storage Used</h3>
 
-<p>{{ storage_used if storage_used else 0 }} GB</p>
+<p>{{ storage_used if storage_used else '0.00 MB' }}</p>
 
 <div class="card-status">
 💾 Real Storage Usage
@@ -171,7 +173,7 @@ style="width: {{ storage_percent if storage_percent else 0 }}%;">
 <p class="storage-text">
 
 Current encrypted storage usage:
-{{ storage_used if storage_used else 0 }} GB out of 15 GB simulated cloud capacity.
+{{ storage_used if storage_used else '0.00 MB' }} out of 15 GB simulated cloud capacity.
 
 </p>
 

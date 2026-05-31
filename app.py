@@ -38,6 +38,28 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(app.config['CLOUD_BUCKET'], exist_ok=True)
 
 # =========================
+# DATABASE MIGRATION CHECK
+# =========================
+def check_db_schema():
+    try:
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT role FROM users LIMIT 1")
+        conn.close()
+    except sqlite3.OperationalError:
+        try:
+            conn = sqlite3.connect('database.db')
+            cursor = conn.cursor()
+            cursor.execute("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'")
+            cursor.execute("UPDATE users SET role='admin' WHERE username='admin'")
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+
+check_db_schema()
+
+# =========================
 # NETWORK CHECKER
 # =========================
 def check_internet_connection():
@@ -94,6 +116,7 @@ def home():
 
     if valid:
         session['user'] = username
+        session['role'] = valid.get('role', 'user') if isinstance(valid, dict) else 'user'
         return redirect('/dashboard')
 
     return """
@@ -134,11 +157,14 @@ def dashboard():
     # Get verified calculations
     _, storage_used, storage_percent = calculate_storage()
 
+    user_settings = get_settings(session['user'])
+
     return render_template(
         'dashboard.html', 
         files=files, 
         storage_used=storage_used, 
-        storage_percent=storage_percent
+        storage_percent=storage_percent,
+        settings=user_settings
     )
 
 # =========================
@@ -150,7 +176,8 @@ def upload_file():
         return redirect('/')
 
     if request.method == 'GET':
-        return render_template('upload.html')
+        user_settings = get_settings(session['user'])
+        return render_template('upload.html', settings=user_settings)
 
     if 'file' not in request.files:
         return "No file selected"
@@ -313,7 +340,9 @@ def search():
         keyword = request.form['keyword']
         results = search_files(keyword, session['user'])
 
-    return render_template('search.html', results=results)
+    user_settings = get_settings(session['user'])
+
+    return render_template('search.html', results=results, settings=user_settings)
 
 # =========================
 # ANALYTICS
@@ -338,6 +367,8 @@ def analytics():
             activity_logs.reverse()
 
     _, storage_used, storage_percent = calculate_storage()
+    
+    user_settings = get_settings(session['user'])
 
     return render_template(
         'analytics.html',
@@ -347,7 +378,8 @@ def analytics():
         duplicate_files=duplicate_files,
         activity_logs=activity_logs,
         storage_used=storage_used,
-        storage_percent=storage_percent
+        storage_percent=storage_percent,
+        settings=user_settings
     )
 
 # =========================
@@ -373,6 +405,27 @@ def settings():
             'notifications': notifications
         }
         save_settings(session['user'], settings_data)
+        
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+        if cloud_sync == 'Enabled':
+            cursor.execute('UPDATE files SET sync_status=? WHERE username=? AND sync_status=?', ('Not Synced', session['user'], 'Sync Disabled'))
+            conn.commit()
+            if check_internet_connection():
+                session['is_online'] = True
+                cursor.execute('SELECT id, filename FROM files WHERE username=? AND sync_status=?', (session['user'], 'Not Synced'))
+                unsynced_files = cursor.fetchall()
+                for file_id, filename in unsynced_files:
+                    path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    if os.path.exists(path):
+                        sync_result = sync_to_cloud(path, app.config['CLOUD_BUCKET'])
+                        cursor.execute('UPDATE files SET sync_status=? WHERE id=?', (sync_result, file_id))
+                conn.commit()
+        else:
+            cursor.execute('UPDATE files SET sync_status=? WHERE username=? AND sync_status=?', ('Sync Disabled', session['user'], 'Not Synced'))
+            conn.commit()
+        conn.close()
+
         return redirect('/settings')
 
     settings_data = get_settings(session['user'])
@@ -412,13 +465,17 @@ def handle_save_settings():
     }
     save_settings(session['user'], settings_data)
 
-    # Automatically sync files if auto-sync was turned back on and internet is available
+    # Update file sync statuses based on the new setting
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
     if cloud_sync == 'Enabled':
+        cursor.execute('UPDATE files SET sync_status=? WHERE username=? AND sync_status=?', ('Not Synced', session['user'], 'Sync Disabled'))
+        conn.commit()
+
         if check_internet_connection():
             session['is_online'] = True
-            conn = sqlite3.connect('database.db')
-            cursor = conn.cursor()
-            cursor.execute('SELECT id, filename FROM files WHERE username=? AND sync_status IN (?, ?)', (session['user'], 'Not Synced', 'Sync Disabled'))
+            cursor.execute('SELECT id, filename FROM files WHERE username=? AND sync_status=?', (session['user'], 'Not Synced'))
             unsynced_files = cursor.fetchall()
             
             for file_id, filename in unsynced_files:
@@ -428,7 +485,11 @@ def handle_save_settings():
                     cursor.execute('UPDATE files SET sync_status=? WHERE id=?', (sync_result, file_id))
             
             conn.commit()
-            conn.close()
+    else:
+        cursor.execute('UPDATE files SET sync_status=? WHERE username=? AND sync_status=?', ('Sync Disabled', session['user'], 'Not Synced'))
+        conn.commit()
+
+    conn.close()
 
     return redirect('/settings')
 
@@ -502,12 +563,12 @@ def admin_dashboard():
     if 'user' not in session:
         return redirect('/')
 
-    if session['user'] != 'admin':
+    if session.get('role') != 'admin' and session['user'] != 'admin':
         return "Access Denied"
 
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT id, username, email FROM users")
+    cursor.execute("SELECT id, username, email, role FROM users")
     users = cursor.fetchall()
     
     cursor.execute("SELECT * FROM files")
@@ -516,13 +577,32 @@ def admin_dashboard():
 
     _, storage_used, _ = calculate_storage()
 
+    user_settings = get_settings(session['user'])
+
     return render_template(
         'dashboard.html',
         files=all_files,
         admin_mode=True,
         users=users,
-        storage_used=storage_used
+        storage_used=storage_used,
+        settings=user_settings
     )
+
+# =========================
+# ADMIN: CHANGE ROLE
+# =========================
+@app.route('/admin/change_role/<int:user_id>/<new_role>')
+def admin_change_role(user_id, new_role):
+    if 'user' not in session or (session.get('role') != 'admin' and session['user'] != 'admin'):
+        return "Access Denied"
+        
+    if new_role in ['admin', 'user']:
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET role=? WHERE id=?", (new_role, user_id))
+        conn.commit()
+        conn.close()
+    return redirect('/admin')
 
 # =========================
 # LOGOUT

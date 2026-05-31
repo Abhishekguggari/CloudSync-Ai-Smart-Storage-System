@@ -22,8 +22,8 @@ href="{{ url_for('static', filename='style.css') }}">
 
 <div class="auth-container">
 
-<div class="logo" onclick="window.location.href='/'" style="cursor: pointer;" title="Go to Home">
-☁ CloudSync AI
+<div class="logo" onclick="window.location.href='/'" style="cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;" title="Go to Home">
+<span class="cloud-icon"></span> CloudSync AI
 </div>
 
 <h1>Create Account</h1>
@@ -41,27 +41,27 @@ action="/register">
 <input
 type="text"
 name="username"
-placeholder="Username"
+placeholder="👤 Username"
 required>
 
 <input
 type="email"
 name="email"
-placeholder="Email Address"
+placeholder="📧 Email Address"
 required>
 
 <input
 type="password"
 name="password"
 id="password"
-placeholder="Password"
+placeholder="🔒 Password"
 required
 onkeyup="checkPassword()">
 
 <input
 type="password"
 id="confirmPassword"
-placeholder="Confirm Password"
+placeholder="🔐 Confirm Password"
 required
 onkeyup="checkPassword()">
 
@@ -78,7 +78,7 @@ onclick="showPassword()">
 </div>
 
 <button type="submit">
-Create Account
+🚀 Create Account
 </button>
 
 <p class="bottom-text">

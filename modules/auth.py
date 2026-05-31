@@ -17,14 +17,15 @@ def register_user(username, email, password):
     cursor.execute(
         '''
         INSERT INTO users
-        (username, email, password)
+        (username, email, password, role)
 
-        VALUES (?, ?, ?)
+        VALUES (?, ?, ?, ?)
         ''',
         (
             username,
             email,
-            hashed
+            hashed,
+            'admin' if username.lower() == 'admin' else 'user'
         )
     )
 
@@ -42,7 +43,7 @@ def login_user(username, password):
 
     cursor.execute(
         '''
-        SELECT password
+        SELECT password, role
         FROM users
         WHERE username=?
         ''',
@@ -55,9 +56,11 @@ def login_user(username, password):
 
     if user:
 
-        return bcrypt.checkpw(
+        is_valid = bcrypt.checkpw(
             password.encode('utf-8'),
             user[0]
         )
+        if is_valid:
+            return {'status': True, 'role': user[1]}
 
     return False
